@@ -2,6 +2,9 @@ import pygame
 import sys
 from constants import *
 from player import Player
+from asteroidfield import AsteroidField
+from asteroid import Asteroid
+from shot import Shot
 
 def main():
     # Initialize Pygame
@@ -20,11 +23,18 @@ def main():
     # Create two groups: updatable and drawable
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
+    asteroids = pygame.sprite.Group()
+    shots = pygame.sprite.Group()
 
-    # Assign the groups to Player's container field
+    # Assign the groups to containers
+    Asteroid.containers = (asteroids, updatable, drawable)
+    Shot.containers = (shots, updatable, drawable)
+    AsteroidField.containers = updatable
+    asteroid_field = AsteroidField()
+
     Player.containers = (updatable, drawable)
-
-    # Initialize dt (delta time)
+    
+    #Initialize dt (delta time)
     dt = 0
 
     # Create a player object in the center of the screen
@@ -39,13 +49,20 @@ def main():
                 running = False
         
         # Game logic here
-        player.update(dt)
+        for obj in updatable:
+            obj.update(dt)
+
+        for asteroid in asteroids:
+            if asteroid.collides_with(player):
+                print("Game over!")
+                sys.exit()
 
         # Fill the screen with black
         screen.fill((0,0,0))
 
         # Draw the player (spaceship)
-        player.draw(screen)
+        for obj in drawable:
+            obj.draw(screen)
 
         # Refresh the screen
         pygame.display.flip()
